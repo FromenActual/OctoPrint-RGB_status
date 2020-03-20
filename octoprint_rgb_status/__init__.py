@@ -3,11 +3,13 @@ from __future__ import absolute_import, unicode_literals
 from octoprint import plugin
 import multiprocessing
 from rpi_ws281x import *
+from .SimpleLEDStrip import *
 from .utils import *
-from .basic_effects import *
+from .simple_basic_effects import *
 
 
 STRIP_SETTINGS = ['led_count', 'led_pin', 'led_freq_hz', 'led_dma', 'led_invert', 'led_brightness', 'led_channel', 'strip_type']
+SIMPLE_STRIP_SETTINGS = ['red_pin', 'green_pin', 'blue_pin', 'freq_hz', 'led_invert', 'led_brightness']
 STRIP_TYPES = {
     'SK6812_STRIP_RGBW': SK6812_STRIP_RGBW,
     'SK6812_STRIP_RBGW': SK6812_STRIP_RBGW,
@@ -229,15 +231,33 @@ class RGBStatusPlugin(
 
     def init_strip(self):
         settings = []
-        for setting in STRIP_SETTINGS:
+        #for setting in STRIP_SETTINGS:
+        #    if setting == 'led_invert':
+        #        settings.append(self._settings.get_boolean([setting]))
+        #    elif setting == 'strip_type':
+        #        settings.append(STRIP_TYPES.get(self._settings.get([setting])))
+        #    else:
+        #        settings.append(self._settings.get_int([setting]))
+        #try:
+        #    self.strip = Adafruit_NeoPixel(*settings)
+        #    self.strip.begin()
+        for setting in SIMPLE_STRIP_SETTINGS:
+			# TODO - Settings are temporarily hard coded since I don't yet know how the settings work
+            if setting == 'red_pin':
+                settings.append(10)
+            elif setting == 'green_pin':
+                settings.append(9)
+            elif setting == 'blue_pin':
+                settings.append(11)
+            elif setting == 'freq_hz':
+                settings.append(50)
             if setting == 'led_invert':
-                settings.append(self._settings.get_boolean([setting]))
-            elif setting == 'strip_type':
-                settings.append(STRIP_TYPES.get(self._settings.get([setting])))
-            else:
-                settings.append(self._settings.get_int([setting]))
+                settings.append(False)
+            elif setting == 'led_brightness':
+                settings.append(255)
+			# Not expecting anything else
         try:
-            self.strip = Adafruit_NeoPixel(*settings)
+            self.strip = SimpleLEDStrip(*settings)
             self.strip.begin()
         except Exception as e:
             self._logger.error(e)
@@ -359,6 +379,7 @@ class RGBStatusPlugin(
 
     def on_shutdown(self):
         self.kill_effect()
+		self.strip.clearGPIO()
 
     def get_update_information(self, *args, **kwargs):
         return {

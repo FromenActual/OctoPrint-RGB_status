@@ -1,4 +1,5 @@
-from rpi_ws281x import *
+#from rpi_ws281x import *
+from .SimpleLEDStrip import *
 from .utils import blend_colors
 import time
 
